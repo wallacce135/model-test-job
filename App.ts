@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
-
+import { createPool } from "slonik";
 
 
 
