@@ -24,7 +24,7 @@ class ModelsController {
         this.router.get(`${this.path}/:id`, getOneModel);
         this.router.post(this.path, createModel);
         this.router.put(`${this.path}/:id`, updateModel);
-        this.router.get(`${this.path}/:id`, deleteModel);
+        this.router.delete(`${this.path}/:id`, deleteModel);
     }
 
     public initializeRoutelessServices(): void {
