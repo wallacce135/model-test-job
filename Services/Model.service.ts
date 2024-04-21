@@ -19,7 +19,9 @@ export const getAllModels = async (request: Request, response: Response, next: N
 }
 
 export const createModel = async (request: Request, response: Response, next: NextFunction) => {
-    // todo: check response.headers.authorization
+    
+    if(checkToken(request.headers.authorization?.split(' ')[1]) === false) throw new HttpError('NOT VALID TOKEN!', 401);
+
     const body: IModel = request.body;
     const values = getValuesOfModel(body);
 
@@ -35,7 +37,9 @@ export const createModel = async (request: Request, response: Response, next: Ne
 }
 
 export const updateModel = async (request: Request, response: Response, next: NextFunction) => {
-    // todo: check response.headers.authorization
+    
+    if(checkToken(request.headers.authorization?.split(' ')[1]) === false) throw new HttpError('NOT VALID TOKEN!', 401);
+
     const { id } = request.params;
     const body: IModel = request.body;
 
@@ -56,7 +60,9 @@ export const updateModel = async (request: Request, response: Response, next: Ne
 }
 
 export const deleteModel = async (request: Request, response: Response, next: NextFunction) => {
-    // todo: check response.headers.authorization
+    
+    if(checkToken(request.headers.authorization?.split(' ')[1]) === false) throw new HttpError('NOT VALID TOKEN!', 401);
+
     const { id } = request.params;
     return pool.query(DELETE_MODEL_QUERY, [ id ]).then(data => {
         if (!data.rows.length) { 
@@ -91,6 +97,21 @@ export const getModelsOnceInDay = () => {
     })
 
 };
+
+
+const checkToken = (authorization: string | undefined): boolean => {
+    
+    const token = authorization ? authorization.split(' ')[0] : undefined;
+    const ACCESS_TOKEN = process.env.ACCESS_TOKEN
+
+    if(token === ACCESS_TOKEN) {
+        return true;
+    }
+    return false;
+    
+
+}
+
 function getValuesOfModel(model: IModel) {
     return [
         model.Id,
