@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { schedule } from 'node-cron';
 import { pool } from '../database';
-import { error } from 'console';
 import { HttpError } from '../Classes/HttpError';
 import { IModel } from '../Interfaces/Model.interface';
-import { CREATE_MODEL_QUERY, DELETE_MODEL_QUERY, GET_MODEL_BY_ID, UPDATE_MODEL_QUERY } from '../Queries/Model.queries';
+import { CREATE_MODEL_QUERY, DELETE_MODEL_QUERY, GET_MODEL_BY_ID, UPDATE_MODEL_QUERY, GET_MODELS } from '../Queries/Model.queries';
 import axios from 'axios';
+
+
 export const getAllModels = async (request: Request, response: Response, next: NextFunction) => {
-    // todo pagination
     const { skip = 0, limit = 0 } = request.body;
 
     const query = limit ? `${GET_MODELS} OFFSET $1 LIMIT $2` : `${GET_MODELS} OFFSET $1`
