@@ -25,4 +25,4 @@ export const DELETE_MODEL_QUERY: string = `
     DELETE FROM model
     WHERE Id = $1
     RETURNING *;
-`
+`;

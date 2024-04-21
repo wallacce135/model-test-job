@@ -1,61 +1,79 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { schedule } from 'node-cron';
 import { pool } from '../database';
+import { error } from 'console';
+import { HttpError } from '../Classes/HttpError';
 import { IModel } from '../Interfaces/Model.interface';
 import { CREATE_MODEL_QUERY, DELETE_MODEL_QUERY, GET_MODEL_BY_ID, UPDATE_MODEL_QUERY } from '../Queries/Model.queries';
 import axios from 'axios';
-
-export const getAllModels = async (request: Request, response: Response) => {
-    const models: IModel[] = (await pool.query(`SELECT * FROM model`)).rows;
-    response.send([
-        ...models
-    ])
+export const getAllModels = async (request: Request, response: Response, next: NextFunction) => {
+    // todo pagination
+    return pool.query(`SELECT * FROM models`)
+    .then(data => response.send(data.rows as IModel[]))
+    .catch(error => next(error))
 }
 
-export const createModel = async (request: Request, response: Response) => {
+export const createModel = async (request: Request, response: Response, next: NextFunction) => {
     // todo: check response.headers.authorization
-    try {
-        const body: IModel = request.body;
-        const values = getValuesOfModel(body);
-        const model: IModel = (await pool.query(CREATE_MODEL_QUERY, values)).rows[0];
+    const body: IModel = request.body;
+    const values = getValuesOfModel(body);
 
-        return response.send(model);
-    }
-    catch (error: any) {
-        console.error(error.stack);
-        return response.send({ message: "Server internal" }) 
-    }
+    return pool.query(CREATE_MODEL_QUERY, values)
+    .then(data => {
+        if (!data.rows.length) { 
+            throw new HttpError("cannot create model") 
+        }; 
+
+        response.send(data.rows[0] as IModel)
+    })
+    .catch(error => next(error))
 }
 
-export const updateModel = async (request: Request, response: Response) => {
+export const updateModel = async (request: Request, response: Response, next: NextFunction) => {
     // todo: check response.headers.authorization
     const { id } = request.params;
     const body: IModel = request.body;
 
     if (id !== body.Id) {
-        throw new Error(`id in url and body doesn\`t match: ${id} != ${body.Id}`);
+        return next(new HttpError(`id in url and body doesn\`t match: ${id} != ${body.Id}`)); 
     }
 
     const values = getValuesOfModel(body)
 
-    const model: IModel = (await pool.query(UPDATE_MODEL_QUERY, values)).rows[0];
+    return pool.query(UPDATE_MODEL_QUERY, values).then(data => {
+        if (!data.rows.length) { 
+            throw new HttpError("cannot update model") 
+        }; 
 
-    response.send(model)
+        response.send(data.rows[0] as IModel)
+    })
+    .catch(error => next(error))
 }
 
-export const deleteModel = async (request: Request, response: Response) => {
+export const deleteModel = async (request: Request, response: Response, next: NextFunction) => {
     // todo: check response.headers.authorization
     const { id } = request.params;
-    const model: IModel = (await pool.query(DELETE_MODEL_QUERY, [ id ])).rows[0];
+    return pool.query(DELETE_MODEL_QUERY, [ id ]).then(data => {
+        if (!data.rows.length) { 
+            throw new HttpError(`0 models was deleted`)
+        }; 
 
-    response.send(model)
+        response.send(data.rows[0] as IModel)
+    })
+    .catch(error => next(error))
 }
 
-export const getOneModel = async (request: Request, response: Response) => {
+export const getOneModel = async (request: Request, response: Response, next: NextFunction) => {
     const { id } = request.params;
-    const model: IModel = (await pool.query(GET_MODEL_BY_ID, [ id ])).rows[0]; 
 
-    response.send(model);
+    return pool.query(GET_MODEL_BY_ID, [ id ]).then(data => {
+        if (!data.rows.length) { 
+            throw new HttpError(`model not found`, 404) 
+        }; 
+
+        response.send(data.rows[0] as IModel)
+    })
+    .catch(error => next(error))
 }
 
 export const getModelsOnceInDay = () => {
