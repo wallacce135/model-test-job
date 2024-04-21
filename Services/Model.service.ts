@@ -21,7 +21,7 @@ export const createModel = async (request: Request, response: Response, next: Ne
     return pool.query(CREATE_MODEL_QUERY, values)
     .then(data => {
         if (!data.rows.length) { 
-            throw new Error("cannot create model") 
+            throw new HttpError("cannot create model") 
         }; 
 
         response.send(data.rows[0] as IModel)
