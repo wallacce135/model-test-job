@@ -18,7 +18,6 @@ class ModelsController {
         this.initializeRoutelessServices();
     }
     
-    
     public initializeRoutes(): void {
         this.router.get(this.path, getAllModels);
         this.router.get(`${this.path}/:id`, getOneModel);
@@ -33,6 +32,5 @@ class ModelsController {
     
     
 }
-
 
 export default ModelsController;
