@@ -3,7 +3,7 @@ export const GET_MODEL_BY_ID: string = `
 `;
 
 export const GET_MODELS: string = `
-    SELECT * FROM model;
+    SELECT * FROM model
 `;
 
 export const CREATE_MODEL_QUERY: string = `
