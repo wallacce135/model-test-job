@@ -8,7 +8,12 @@ import { CREATE_MODEL_QUERY, DELETE_MODEL_QUERY, GET_MODEL_BY_ID, UPDATE_MODEL_Q
 import axios from 'axios';
 export const getAllModels = async (request: Request, response: Response, next: NextFunction) => {
     // todo pagination
-    return pool.query(`SELECT * FROM models`)
+    const { skip = 0, limit = 0 } = request.body;
+
+    const query = limit ? `${GET_MODELS} OFFSET $1 LIMIT $2` : `${GET_MODELS} OFFSET $1`
+    const values = limit ? [ skip, limit ] : [ skip ];
+
+    return pool.query(query, values)
     .then(data => response.send(data.rows as IModel[]))
     .catch(error => next(error))
 }
