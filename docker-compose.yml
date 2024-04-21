@@ -1,34 +1,34 @@
-version: '3.8'
+# version: '3.8'
 
 services:
-  postgresdb:
-    image: postgres
-    restart: unless-stopped
-    env_file: ./.env
-    environment:
-      - POSTGRES_USER=$POSTGRESDB_USER
-      - POSTGRES_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
-      - POSTGRES_DB=$POSTGRESDB_DATABASE
-    ports:
-      - $POSTGRESDB_LOCAL_PORT:$POSTGRESDB_DOCKER_PORT
-    volumes:
-      - db:/var/lib/postgres
   app:
     depends_on:
-      - postgresdb
+      - db
     build: ./
-    restart: unless-stopped
+    restart: always
     env_file: ./.env
     ports:
       - $NODE_DOCKER_PORT:$NODE_LOCAL_PORT
     environment:
-      - DB_HOST=localhost
-      - DB_USER=$POSTGRESDB_USER
-      - DB_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
-      - DB_NAME=$POSTGRESDB_DATABASE
-      - DB_PORT=$POSTGRESDB_DOCKER_PORT
-    stdin_open: true
-    tty: true
+      - POSTGRES_USER=$POSTGRESDB_USER
+      - POSTGRES_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
+      - POSTGRES_DB=$POSTGRESDB_DATABASE
+    links:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    env_file: ./.env
+    environment:
+      - POSTGRES_USER=$POSTGRESDB_USER
+      - POSTGRES_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
+      - POSTGRES_DB=db-model-test-job
+    ports:
+      - $POSTGRESDB_LOCAL_PORT:$POSTGRESDB_DOCKER_PORT
+    volumes:
+      - postgres-db:/var/lib/postgres
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
 volumes: 
-  db:
+  postgres-db:

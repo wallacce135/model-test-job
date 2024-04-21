@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5555
+EXPOSE 5555 5432
 
 RUN npm run build
 

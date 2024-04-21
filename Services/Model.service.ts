@@ -68,9 +68,6 @@ export const getModelsOnceInDay = () => {
     })
 
 };
-
-// additional helpers
-
 function getValuesOfModel(model: IModel) {
     return [
         model.Id,
