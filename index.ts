@@ -7,7 +7,7 @@ const app = new App(
     [
         new ModelsContoller(),
     ],
-    process.env.PORT || 3000
+    process.env.NODE_LOCAL_PORT || 3000
 )
 
 app.listen()

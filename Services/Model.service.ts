@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { schedule } from 'node-cron';
-import { pool } from '../Database';
-import { IModel } from '../Dto/Model.dto';
+import { pool } from '../database';
+import { IModel } from '../Interfaces/Model.interface';
 import { CREATE_MODEL_QUERY, DELETE_MODEL_QUERY, GET_MODEL_BY_ID, UPDATE_MODEL_QUERY } from '../Queries/Model.queries';
+import axios from 'axios';
 
 export const getAllModels = async (request: Request, response: Response) => {
-    // todo pagination
     const models: IModel[] = (await pool.query(`SELECT * FROM model`)).rows;
-
     response.send([
         ...models
     ])
@@ -60,10 +59,13 @@ export const getOneModel = async (request: Request, response: Response) => {
 }
 
 export const getModelsOnceInDay = () => {
-
-    // schedule('* * * * * *', () => {
-    //     console.log('Hello world!');
-    // })
+    schedule('0 0 * * *', async () => {
+        const data = await axios.get<any>("https://openrouter.ai/api/v1/models");
+        for (const model of data.data.data) {
+            await pool.query(CREATE_MODEL_QUERY, [model.id, model.name, model.description, model.context_length, model.architecture.tokenizer])
+        }
+        console.log('CRON task saved data!');
+    })
 
 };
 

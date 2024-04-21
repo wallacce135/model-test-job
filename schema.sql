@@ -1,13 +1,5 @@
-DO
-$do$
-BEGIN
-   IF EXISTS (SELECT FROM pg_database WHERE datname = 'db-model-test-job') THEN
-      RAISE NOTICE 'Database already exists';
-   ELSE
-      PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE mydb');
-   END IF;
-END
-$do$;
+-- SELECT 'CREATE DATABASE db-model-test-job'
+-- WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db-model-test-job')\gexec
 
 CREATE TABLE IF NOT EXISTS model (
     Id VARCHAR(128) PRIMARY KEY NOT NULL,
